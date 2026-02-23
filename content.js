@@ -1,13 +1,52 @@
 let isActive = false;
+let currentDomain = null;
 
 function activate() {
   isActive = true;
+  currentDomain = window.location.hostname;
   document.body.classList.add('link-grabber-active');
 }
 
 function deactivate() {
   isActive = false;
+  currentDomain = null;
   document.body.classList.remove('link-grabber-active');
+}
+
+function extractYouTubeRedirect(url) {
+  try {
+    const urlObj = new URL(url);
+    if (urlObj.hostname.includes('youtube.com') && urlObj.pathname === '/redirect') {
+      const qParam = urlObj.searchParams.get('q');
+      if (qParam) {
+        return qParam;
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
+function getDomain(url) {
+  try {
+    return new URL(url).hostname;
+  } catch (e) {
+    return null;
+  }
+}
+
+function isSameDomain(url) {
+  if (!currentDomain || !url) return false;
+  const linkDomain = getDomain(url);
+  if (!linkDomain) return false;
+  return linkDomain === currentDomain || linkDomain.endsWith('.' + currentDomain);
+}
+
+function showIndicator(message) {
+  const indicator = document.createElement('div');
+  indicator.className = 'link-grabber-indicator';
+  indicator.textContent = message;
+  document.body.appendChild(indicator);
+  setTimeout(() => indicator.remove(), 1500);
 }
 
 function handleLinkClick(e) {
@@ -16,22 +55,33 @@ function handleLinkClick(e) {
   const anchor = e.target.closest('a');
   if (!anchor) return;
   
-  e.preventDefault();
-  e.stopPropagation();
+  let url = anchor.href;
   
-  const link = {
-    url: anchor.href,
-    text: anchor.textContent?.trim() || ''
-  };
+  const youtubeRedirect = extractYouTubeRedirect(url);
+  if (youtubeRedirect) {
+    url = youtubeRedirect;
+  }
   
-  if (link.url && !link.url.startsWith('javascript:') && !link.url.startsWith('mailto:')) {
-    chrome.runtime.sendMessage({ type: 'saveLink', link });
+  if (isSameDomain(url)) {
+    return;
+  }
+  
+  if (url && !url.startsWith('javascript:') && !url.startsWith('mailto:')) {
+    e.preventDefault();
+    e.stopPropagation();
     
-    const indicator = document.createElement('div');
-    indicator.className = 'link-grabber-indicator';
-    indicator.textContent = 'Link captured!';
-    document.body.appendChild(indicator);
-    setTimeout(() => indicator.remove(), 1500);
+    const link = {
+      url: url,
+      text: anchor.textContent?.trim() || ''
+    };
+    
+    chrome.runtime.sendMessage({ type: 'saveLink', link }, (saved) => {
+      if (saved === false) {
+        showIndicator('Link already captured!');
+      } else {
+        showIndicator('Link captured!');
+      }
+    });
   }
 }
 
@@ -45,7 +95,7 @@ function handleKeyDown(e) {
 document.addEventListener('click', handleLinkClick, true);
 document.addEventListener('keydown', handleKeyDown);
 
-chrome.runtime.sendMessage({ type: 'getActiveState' }, (active) => {
+chrome.runtime.sendMessage({ type: 'getActiveState', tabId: null }, (active) => {
   if (active) {
     activate();
   }

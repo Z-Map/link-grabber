@@ -8,10 +8,13 @@ const linksList = document.getElementById('linksList');
 const linkCount = document.getElementById('linkCount');
 const statusEl = document.getElementById('status');
 
+let currentTabId = null;
+
 async function init() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  currentTabId = tab.id;
   
-  chrome.runtime.sendMessage({ type: 'getActiveState' }, (active) => {
+  chrome.runtime.sendMessage({ type: 'getActiveState', tabId: currentTabId }, (active) => {
     isActive = !!active;
     updateUI();
   });
@@ -19,11 +22,6 @@ async function init() {
   chrome.runtime.sendMessage({ type: 'getLinks' }, (result) => {
     links = result || [];
     renderLinks();
-  });
-  
-  chrome.runtime.sendMessage({ type: 'getActiveState' }, (active) => {
-    isActive = !!active;
-    updateUI();
   });
 }
 
@@ -77,12 +75,11 @@ function formatTime(timestamp) {
 toggleBtn.addEventListener('click', async () => {
   isActive = !isActive;
   
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  chrome.runtime.sendMessage({ type: 'toggle', active: isActive, tabId: tab.id });
+  chrome.runtime.sendMessage({ type: 'toggle', active: isActive, tabId: currentTabId });
   
   updateUI();
   
-  chrome.tabs.sendMessage(tab.id, { type: 'toggle', active: isActive });
+  chrome.tabs.sendMessage(currentTabId, { type: 'toggle', active: isActive });
 });
 
 exportBtn.addEventListener('click', () => {

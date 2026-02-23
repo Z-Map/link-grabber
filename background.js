@@ -2,16 +2,17 @@ const ACTIVE_TAB_KEY = 'activeTabId';
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'toggle') {
-    handleToggle(message.active, sender.tab?.id);
+    handleToggle(message.active, message.tabId || sender.tab?.id);
   } else if (message.type === 'saveLink') {
-    handleSaveLink(message.link);
+    handleSaveLink(message.link).then(result => sendResponse(result));
+    return true;
   } else if (message.type === 'getLinks') {
     handleGetLinks().then(links => sendResponse(links));
     return true;
   } else if (message.type === 'clearLinks') {
     handleClearLinks();
   } else if (message.type === 'getActiveState') {
-    handleGetActiveState().then(active => sendResponse(active));
+    handleGetActiveState(message.tabId).then(active => sendResponse(active));
     return true;
   }
 });
@@ -27,11 +28,17 @@ async function handleToggle(active, tabId) {
 async function handleSaveLink(link) {
   const data = await chrome.storage.local.get('links');
   const links = data.links || [];
+  
+  if (links.some(l => l.url === link.url)) {
+    return false;
+  }
+  
   links.push({
     url: link.url,
     timestamp: Date.now()
   });
   await chrome.storage.local.set({ links });
+  return true;
 }
 
 async function handleGetLinks() {
@@ -43,9 +50,9 @@ async function handleClearLinks() {
   await chrome.storage.local.set({ links: [] });
 }
 
-async function handleGetActiveState() {
+async function handleGetActiveState(tabId) {
   const data = await chrome.storage.local.get(ACTIVE_TAB_KEY);
-  return !!data[ACTIVE_TAB_KEY];
+  return data[ACTIVE_TAB_KEY] === tabId;
 }
 
 chrome.tabs.onRemoved.addListener(async (tabId) => {
