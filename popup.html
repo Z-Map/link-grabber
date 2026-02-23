@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Link Grabber</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Link Grabber</h1>
+      <div id="status" class="status inactive">Inactive</div>
+    </div>
+    
+    <button id="toggleBtn" class="toggle-btn">Activate</button>
+    
+    <div class="links-section">
+      <div class="links-header">
+        <span>Captured Links (<span id="linkCount">0</span>)</span>
+      </div>
+      <ul id="linksList" class="links-list"></ul>
+    </div>
+    
+    <div class="actions">
+      <button id="exportBtn" class="action-btn">Export JSON</button>
+      <button id="clearBtn" class="action-btn danger">Clear All</button>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Link Grabber",
+  "version": "1.0",
+  "description": "Temporarily intercept and store link clicks instead of navigating to them",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
