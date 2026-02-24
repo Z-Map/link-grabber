@@ -35,6 +35,8 @@ async function handleSaveLink(link) {
   
   links.push({
     url: link.url,
+    text: link.text || '',
+    pageUrl: link.pageUrl || '',
     timestamp: Date.now()
   });
   await chrome.storage.local.set({ links });

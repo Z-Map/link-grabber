@@ -3,6 +3,8 @@ let links = [];
 
 const toggleBtn = document.getElementById('toggleBtn');
 const exportBtn = document.getElementById('exportBtn');
+const exportMdBtn = document.getElementById('exportMdBtn');
+const copyMdBtn = document.getElementById('copyMdBtn');
 const clearBtn = document.getElementById('clearBtn');
 const linksList = document.getElementById('linksList');
 const linkCount = document.getElementById('linkCount');
@@ -52,16 +54,28 @@ function renderLinks() {
     const li = document.createElement('li');
     li.className = 'link-item';
     
+    const textSpan = document.createElement('span');
+    textSpan.className = 'link-text';
+    textSpan.textContent = link.text || '(no text)';
+    textSpan.title = link.text || '';
+    
     const urlSpan = document.createElement('span');
     urlSpan.className = 'link-url';
     urlSpan.textContent = link.url;
     urlSpan.title = link.url;
     
+    const pageSpan = document.createElement('span');
+    pageSpan.className = 'link-page';
+    pageSpan.textContent = link.pageUrl ? link.pageUrl : '';
+    pageSpan.title = link.pageUrl || '';
+    
     const timeSpan = document.createElement('span');
     timeSpan.className = 'link-time';
     timeSpan.textContent = formatTime(link.timestamp);
     
+    li.appendChild(textSpan);
     li.appendChild(urlSpan);
+    li.appendChild(pageSpan);
     li.appendChild(timeSpan);
     linksList.appendChild(li);
   });
@@ -103,5 +117,76 @@ clearBtn.addEventListener('click', () => {
   links = [];
   renderLinks();
 });
+
+exportMdBtn.addEventListener('click', () => {
+  if (links.length === 0) return;
+  
+  const md = generateMarkdown();
+  
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `links-${Date.now()}.md`;
+  a.click();
+  
+  URL.revokeObjectURL(url);
+});
+
+copyMdBtn.addEventListener('click', async () => {
+  if (links.length === 0) return;
+  
+  const md = generateMarkdown();
+  await navigator.clipboard.writeText(md);
+  
+  const originalIcon = copyMdBtn.innerHTML;
+  copyMdBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+  setTimeout(() => {
+    copyMdBtn.innerHTML = originalIcon;
+  }, 1500);
+});
+
+function generateMarkdown() {
+  const reversedLinks = links.slice().reverse();
+  
+  const grouped = {};
+  const ungrouped = [];
+  
+  reversedLinks.forEach(link => {
+    const source = link.pageUrl || '(no source)';
+    if (!grouped[source]) grouped[source] = [];
+    grouped[source].push(link);
+  });
+  
+  let md = '# Captured Links\n\n';
+  
+  Object.entries(grouped).forEach(([source, sourceLinks]) => {
+    if (sourceLinks.length > 1) {
+      md += `## ${source}\n\n`;
+      sourceLinks.forEach(link => {
+        const text = link.text || link.url;
+        md += `- [${text}](${link.url})\n`;
+      });
+      md += '\n';
+    } else {
+      ungrouped.push(sourceLinks[0]);
+    }
+  });
+  
+  if (ungrouped.length > 0) {
+    md += '## Other\n\n';
+    ungrouped.forEach(link => {
+      const text = link.text || link.url;
+      md += `- [${text}](${link.url})`;
+      if (link.pageUrl) {
+        md += ` (from ${link.pageUrl})`;
+      }
+      md += '\n';
+    });
+  }
+  
+  return md;
+}
 
 document.addEventListener('DOMContentLoaded', init);

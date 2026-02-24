@@ -173,7 +173,7 @@ function handleLinkClick(e) {
     e.preventDefault();
     e.stopPropagation();
     
-    const link = { url, text: anchor.textContent?.trim() || '' };
+    const link = { url, text: anchor.textContent?.trim() || '', pageUrl: window.location.href };
     
     chrome.runtime.sendMessage({ type: 'saveLink', link }, (saved) => {
       if (saved === false) {
