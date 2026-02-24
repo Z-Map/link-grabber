@@ -14,6 +14,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.type === 'getActiveState') {
     handleGetActiveState(message.tabId).then(active => sendResponse(active));
     return true;
+  } else if (message.type === 'grabLinkFromContext') {
+    handleSaveLink(message.link).then(result => sendResponse(result));
+    return true;
   }
 });
 
@@ -88,3 +91,22 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
     : { '16': 'icons/icon-inactive-16.png', '32': 'icons/icon-inactive-32.png', '48': 'icons/icon-inactive-48.png', '96': 'icons/icon-inactive-96.png', '128': 'icons/icon-inactive-128.png' };
   await chrome.action.setIcon({path: iconPath});
 })();
+
+chrome.contextMenus.create({
+  id: 'grab-link',
+  title: 'Grab Link',
+  contexts: ['link']
+});
+
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  if (info.menuItemId === 'grab-link' && info.linkUrl) {
+    const result = await handleSaveLink({
+      url: info.linkUrl,
+      text: info.linkText || '',
+      pageUrl: tab.url || ''
+    });
+    if (result) {
+      chrome.tabs.sendMessage(tab.id, { type: 'linkGrabbed', link: info.linkUrl });
+    }
+  }
+});
