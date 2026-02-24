@@ -18,7 +18,7 @@ function injectStyles() {
       top: 0px;
       right: 0px;
       width: 6vh;
-      height: 6vw;
+      height: 6vh;
       background: #4caf50;
       border-radius: 0 0 0 8px;
       display: flex;
@@ -29,41 +29,29 @@ function injectStyles() {
     }
     a.${UI_ID}-captured {
       position: relative !important;
-      display: inline-block;
+      display: inline !important;
+      overflow: clip !important;
     }
     a.${UI_ID}-captured::before {
       content: '';
       position: absolute;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(90deg, transparent 0%, rgba(76, 175, 80, 0.4) 50%, transparent 100%);
-      animation: ${UI_ID}-scan 0.6s ease-out;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent 0%, rgba(76, 175, 80, 0.8) 50%, transparent 100%);
+      animation: ${UI_ID}-scan 0.5s ease-out forwards;
       pointer-events: none;
       z-index: 999998;
     }
-    a.${UI_ID}-captured::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(180deg, transparent 0%, rgba(76, 175, 80, 0.6) 50%, transparent 100%);
-      animation: ${UI_ID}-scan 0.6s ease-out;
-      pointer-events: none;
-      z-index: 999999;
-    }
     @keyframes ${UI_ID}-scan {
-      0% { transform: scaleY(0); opacity: 0; }
-      50% { opacity: 1; }
-      100% { transform: scaleY(1); opacity: 0; }
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
     }
     #${NOTIFY_ID} {
       position: fixed;
       top: 1.6vh;
-      right: 8vw;
+      right: 8vh;
       background: #333;
       color: #fff;
       padding: 0.2em 0.5em;
@@ -118,7 +106,7 @@ function showNotification(message, isSuccess = true) {
 
 function applyLinkEffect(anchor) {
   anchor.classList.add(`${UI_ID}-captured`);
-  setTimeout(() => anchor.classList.remove(`${UI_ID}-captured`), 600);
+  setTimeout(() => anchor.classList.remove(`${UI_ID}-captured`), 500);
 }
 
 function cleanup() {
