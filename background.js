@@ -18,6 +18,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 async function handleToggle(active, tabId) {
+  const iconPath = active 
+    ? { '16': 'icons/icon-16.png', '32': 'icons/icon-32.png', '48': 'icons/icon-48.png', '96': 'icons/icon-96.png', '128': 'icons/icon-128.png' }
+    : { '16': 'icons/icon-inactive-16.png', '32': 'icons/icon-inactive-32.png', '48': 'icons/icon-inactive-48.png', '96': 'icons/icon-inactive-96.png', '128': 'icons/icon-inactive-128.png' };
+  
+  await chrome.action.setIcon({path: iconPath});
+  
   if (active) {
     await chrome.storage.local.set({ [ACTIVE_TAB_KEY]: tabId });
   } else {
@@ -63,3 +69,12 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
     await chrome.storage.local.remove(ACTIVE_TAB_KEY);
   }
 });
+
+(async () => {
+  const data = await chrome.storage.local.get(ACTIVE_TAB_KEY);
+  const isActive = !!data[ACTIVE_TAB_KEY];
+  const iconPath = isActive
+    ? { '16': 'icons/icon-16.png', '32': 'icons/icon-32.png', '48': 'icons/icon-48.png', '96': 'icons/icon-96.png', '128': 'icons/icon-128.png' }
+    : { '16': 'icons/icon-inactive-16.png', '32': 'icons/icon-inactive-32.png', '48': 'icons/icon-inactive-48.png', '96': 'icons/icon-inactive-96.png', '128': 'icons/icon-inactive-128.png' };
+  await chrome.action.setIcon({path: iconPath});
+})();
