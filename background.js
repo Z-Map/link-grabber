@@ -70,6 +70,16 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
   }
 });
 
+chrome.tabs.onActivated.addListener(async (activeInfo) => {
+  const data = await chrome.storage.local.get(ACTIVE_TAB_KEY);
+  if (data[ACTIVE_TAB_KEY] && data[ACTIVE_TAB_KEY] !== activeInfo.tabId) {
+    await chrome.storage.local.remove(ACTIVE_TAB_KEY);
+    const iconPath = { '16': 'icons/icon-inactive-16.png', '32': 'icons/icon-inactive-32.png', '48': 'icons/icon-inactive-48.png', '96': 'icons/icon-inactive-96.png', '128': 'icons/icon-inactive-128.png' };
+    await chrome.action.setIcon({path: iconPath});
+    chrome.tabs.sendMessage(data[ACTIVE_TAB_KEY], { type: 'toggle', active: false });
+  }
+});
+
 (async () => {
   const data = await chrome.storage.local.get(ACTIVE_TAB_KEY);
   const isActive = !!data[ACTIVE_TAB_KEY];
