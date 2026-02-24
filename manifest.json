@@ -34,5 +34,14 @@
     "48": "icons/icon-48.png",
     "96": "icons/icon-96.png",
     "128": "icons/icon-128.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "@link-grabber.q-map",
+      "data_collection_permissions": {
+          "required": ["none"]
+        },
+      "strict_min_version": "48.0"
+    }
   }
 }
