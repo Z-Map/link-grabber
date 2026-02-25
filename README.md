@@ -2,6 +2,8 @@
 
 A browser extension that intercepts link clicks and stores them for later, instead of navigating to them immediately.
 
+![Screenshot](docs/extension_screen.png)
+
 ## Features
 
 - Toggle link interception on/off per tab
