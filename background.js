@@ -14,6 +14,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.type === 'getActiveState') {
     handleGetActiveState(message.tabId).then(active => sendResponse(active));
     return true;
+  } else if (message.type === 'deleteLink') {
+    handleDeleteLink(message.url);
   } else if (message.type === 'grabLinkFromContext') {
     handleSaveLink(message.link).then(result => sendResponse(result));
     return true;
@@ -59,6 +61,13 @@ async function handleGetLinks() {
 
 async function handleClearLinks() {
   await chrome.storage.local.set({ links: [] });
+}
+
+async function handleDeleteLink(url) {
+  const data = await chrome.storage.local.get('links');
+  const links = data.links || [];
+  const filtered = links.filter(l => l.url !== url);
+  await chrome.storage.local.set({ links: filtered });
 }
 
 async function handleGetActiveState(tabId) {

@@ -2,6 +2,7 @@ let isActive = false;
 let links = [];
 
 const toggleBtn = document.getElementById('toggleBtn');
+const savePageBtn = document.getElementById('savePageBtn');
 const exportBtn = document.getElementById('exportBtn');
 const exportMdBtn = document.getElementById('exportMdBtn');
 const copyMdBtn = document.getElementById('copyMdBtn');
@@ -54,6 +55,15 @@ function renderLinks() {
     const li = document.createElement('li');
     li.className = 'link-item';
     
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.innerHTML = '&times;';
+    deleteBtn.title = 'Delete';
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteLink(link.url);
+    });
+    
     const textSpan = document.createElement('span');
     textSpan.className = 'link-text';
     textSpan.textContent = link.text || '(no text)';
@@ -73,6 +83,7 @@ function renderLinks() {
     timeSpan.className = 'link-time';
     timeSpan.textContent = formatTime(link.timestamp);
     
+    li.appendChild(deleteBtn);
     li.appendChild(textSpan);
     li.appendChild(urlSpan);
     li.appendChild(pageSpan);
@@ -94,6 +105,28 @@ toggleBtn.addEventListener('click', async () => {
   updateUI();
   
   chrome.tabs.sendMessage(currentTabId, { type: 'toggle', active: isActive });
+});
+
+savePageBtn.addEventListener('click', async () => {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  
+  const result = await new Promise(resolve => {
+    chrome.runtime.sendMessage({ 
+      type: 'saveLink', 
+      link: { 
+        url: tab.url, 
+        text: tab.title || '',
+        pageUrl: '' 
+      } 
+    }, resolve);
+  });
+  
+  if (result) {
+    chrome.runtime.sendMessage({ type: 'getLinks' }, (updatedLinks) => {
+      links = updatedLinks || [];
+      renderLinks();
+    });
+  }
 });
 
 exportBtn.addEventListener('click', () => {
@@ -187,6 +220,12 @@ function generateMarkdown() {
   }
   
   return md;
+}
+
+function deleteLink(url) {
+  chrome.runtime.sendMessage({ type: 'deleteLink', url: url });
+  links = links.filter(l => l.url !== url);
+  renderLinks();
 }
 
 document.addEventListener('DOMContentLoaded', init);

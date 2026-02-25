@@ -112,6 +112,24 @@ h1 {
   background: var(--accent-red-hover);
 }
 
+.save-page-btn {
+  width: 100%;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  margin-top: 8px;
+  transition: background 0.2s;
+}
+
+.save-page-btn:hover {
+  background: var(--action-bg);
+}
+
 .links-section {
   margin-top: 16px;
   background: var(--bg-secondary);
@@ -139,6 +157,26 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  position: relative;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.delete-btn:hover {
+  background: var(--danger-bg);
+  color: var(--danger-color);
 }
 
 .link-item:last-child {
