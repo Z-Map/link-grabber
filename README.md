@@ -18,6 +18,8 @@ A browser extension that intercepts link clicks and stores them for later, inste
 ### Firefox (Recommended)
 Download the latest release from the [Releases page](https://github.com/Z-Map/link-grabber/releases).
 
+To install the `.xpi` file in Firefox, go to `about:addons`, click the gear icon, select "Install Add-on From File...", and choose the downloaded file.
+
 ### Manual Installation
 1. Build: `npm run build`
 2. Go to `about:debugging`
